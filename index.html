@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panorama Site Builder Pro — Professional 360° Tour Creator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.7/build/pannellum.css">
+  <link rel="stylesheet" href="css/builder.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">360°</div>
+        <div>
+          <div class="logo-title">Panorama Builder</div>
+          <div class="logo-subtitle">Pro Edition</div>
+        </div>
+      </div>
+      <div class="project-name">
+        <input type="text" id="projectName" value="Новый тур" placeholder="Название тура">
+        <span id="saveStatus" class="save-status">Сохранено</span>
+      </div>
+      <div class="header-actions">
+        <button id="btnSave" class="btn btn-secondary" title="Скачать проект">💾 Сохранить</button>
+        <button id="btnLoad" class="btn btn-secondary" title="Загрузить проект">📂 Загрузить</button>
+        <button id="btnExport" class="btn btn-primary">🚀 Экспорт сайта</button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <aside class="sidebar left-sidebar">
+        <div class="sidebar-header">
+          <h3>Сцены <span id="sceneCount" class="badge">0</span></h3>
+          <button id="btnAddScenes" class="btn btn-small btn-primary">+ Добавить</button>
+          <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none">
+        </div>
+        <div id="scenesList" class="scenes-list">
+          <div class="empty-state">
+            <div class="empty-icon">🖼️</div>
+            <p>Загрузите equirectangular панорамы</p>
+            <small>JPEG, PNG, WebP</small>
+          </div>
+        </div>
+      </aside>
+
+      <main class="preview-area">
+        <div id="previewContainer" class="preview-container">
+          <div class="preview-placeholder">
+            <div class="placeholder-content">
+              <div class="placeholder-icon">🌐</div>
+              <h2>Живой предпросмотр</h2>
+              <p>Добавьте сцены, чтобы начать создание тура</p>
+            </div>
+          </div>
+          <div id="pannellumContainer" style="width:100%;height:100%;display:none;"></div>
+        </div>
+        <div class="preview-toolbar">
+          <button id="btnAddHotspot" class="btn btn-small">📍 Добавить хотспот</button>
+          <span id="hotspotModeIndicator" class="mode-indicator" style="display:none;">Кликните на панораму, чтобы разместить хотспот</span>
+          <button id="btnResetView" class="btn btn-small">↺ Сбросить вид</button>
+          <div class="toolbar-spacer"></div>
+          <span id="viewInfo" class="view-info">pitch: 0° yaw: 0°</span>
+        </div>
+      </main>
+
+      <aside class="sidebar right-sidebar">
+        <div class="tabs">
+          <button class="tab active" data-tab="general">Общее</button>
+          <button class="tab" data-tab="theme">Тема</button>
+          <button class="tab" data-tab="modules">Модули</button>
+          <button class="tab" data-tab="hotspots">Хотспоты</button>
+        </div>
+
+        <div id="tab-general" class="tab-content active">
+          <div class="form-group">
+            <label>Качество экспорта</label>
+            <select id="exportQuality">
+              <option value="high">Высокое (оригинал)</option>
+              <option value="medium" selected>Среднее (оптимизация)</option>
+              <option value="low">Низкое (макс. сжатие)</option>
+            </select>
+          </div>
+          <div class="form-group toggle-group">
+            <label>Автоповорот</label>
+            <label class="switch"><input type="checkbox" id="autoRotate"><span class="slider"></span></label>
+          </div>
+          <div class="form-group toggle-group">
+            <label>Прогресс-бар загрузки</label>
+            <label class="switch"><input type="checkbox" id="showProgress" checked><span class="slider"></span></label>
+          </div>
+          <div class="form-group">
+            <label>Звуковое сопровождение (URL)</label>
+            <input type="url" id="audioUrl" placeholder="https://example.com/music.mp3">
+          </div>
+        </div>
+
+        <div id="tab-theme" class="tab-content">
+          <div class="form-group">
+            <label>Пресет темы</label>
+            <select id="themePreset">
+              <option value="dark">Тёмная</option>
+              <option value="light">Светлая</option>
+              <option value="modern">Современная</option>
+              <option value="minimal">Минимализм</option>
+              <option value="luxury">Люкс</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Основной цвет</label>
+            <input type="color" id="primaryColor" value="#6366f1">
+          </div>
+          <div class="form-group">
+            <label>Фон интерфейса</label>
+            <input type="color" id="bgColor" value="#0f172a">
+          </div>
+          <div class="form-group">
+            <label>Шрифт</label>
+            <select id="fontFamily">
+              <option value="Inter">Inter</option>
+              <option value="Roboto">Roboto</option>
+              <option value="system-ui">Системный</option>
+              <option value="Georgia">Georgia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Прозрачность UI <span id="opacityValue">0.90</span></label>
+            <input type="range" id="uiOpacity" min="0.4" max="1" step="0.05" value="0.9">
+          </div>
+        </div>
+
+        <div id="tab-modules" class="tab-content">
+          <div class="form-group toggle-group">
+            <label>Карусель сцен</label>
+            <label class="switch"><input type="checkbox" id="showCarousel" checked><span class="slider"></span></label>
+          </div>
+          <div class="form-group">
+            <label>Позиция карусели</label>
+            <select id="carouselPosition">
+              <option value="bottom">Снизу</option>
+              <option value="side">Сбоку</option>
+            </select>
+          </div>
+          <div class="form-group toggle-group">
+            <label>Логотип</label>
+            <label class="switch"><input type="checkbox" id="showLogo" checked><span class="slider"></span></label>
+          </div>
+          <div class="form-group">
+            <label>Текст логотипа</label>
+            <input type="text" id="logoText" value="Моя компания">
+          </div>
+          <div class="form-group toggle-group">
+            <label>Кнопка «Об аудитории»</label>
+            <label class="switch"><input type="checkbox" id="showAbout"><span class="slider"></span></label>
+          </div>
+          <div class="form-group toggle-group">
+            <label>Информационные карточки</label>
+            <label class="switch"><input type="checkbox" id="showInfoCards"><span class="slider"></span></label>
+          </div>
+          <div class="form-group toggle-group">
+            <label>Мини-карта</label>
+            <label class="switch"><input type="checkbox" id="showMinimap"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div id="tab-hotspots" class="tab-content">
+          <div id="hotspotsList" class="hotspots-list">
+            <p class="hint">Выберите сцену → нажмите «Добавить хотспот» → кликните на панораму</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Hotspot Edit Modal -->
+  <div id="hotspotModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Редактировать хотспот</h3>
+      <div class="form-group">
+        <label>Текст</label>
+        <input type="text" id="modalText">
+      </div>
+      <div class="form-group">
+        <label>Тип</label>
+        <select id="modalType">
+          <option value="info">Информация</option>
+          <option value="scene">Переход к сцене</option>
+        </select>
+      </div>
+      <div class="form-group" id="modalUrlGroup">
+        <label>URL (для info)</label>
+        <input type="url" id="modalUrl" placeholder="https://...">
+      </div>
+      <div class="form-group" id="modalSceneGroup" style="display:none;">
+        <label>Целевая сцена</label>
+        <select id="modalTargetScene"></select>
+      </div>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn btn-secondary">Отмена</button>
+        <button id="modalSave" class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.7/build/pannellum.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
